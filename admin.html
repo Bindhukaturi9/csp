@@ -1,0 +1,539 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - WE FOR YOU</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --coffee-dark: #6F4E37;
+      --coffee-light: #A0826D;
+      --coffee-cream: #E8D5C4;
+      --coffee-accent: #8B6F47;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--coffee-dark) 0%, var(--coffee-accent) 100%);
+      background-attachment: fixed;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: linear-gradient(90deg, var(--coffee-dark) 0%, var(--coffee-accent) 100%) !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: white !important;
+    }
+
+    .container-fluid {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+    }
+
+    .stats-card h3 {
+      color: var(--coffee-dark);
+      font-weight: 700;
+      font-size: 2.5rem;
+      margin: 1rem 0;
+    }
+
+    .stats-card p {
+      color: #666;
+      font-size: 1.1rem;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .stats-card .icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .table-container h3 {
+      color: var(--coffee-dark);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      border-bottom: 3px solid var(--coffee-light);
+      padding-bottom: 1rem;
+    }
+
+    .table {
+      margin: 0;
+    }
+
+    .table thead {
+      background: linear-gradient(90deg, var(--coffee-dark) 0%, var(--coffee-accent) 100%);
+      color: white;
+    }
+
+    .table th {
+      padding: 1.2rem;
+      font-weight: 600;
+      border: none;
+    }
+
+    .table td {
+      padding: 1rem;
+      vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+      background: var(--coffee-cream);
+    }
+
+    .badge-status {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-active {
+      background: #28a745;
+      color: white;
+    }
+
+    .badge-pending {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .btn-back {
+      background: var(--coffee-light);
+      color: white;
+      text-decoration: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      transition: 0.3s;
+      display: inline-block;
+      margin-bottom: 2rem;
+      border: none;
+      font-weight: 600;
+    }
+
+    .btn-back:hover {
+      background: var(--coffee-dark);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: #999;
+      font-style: italic;
+    }
+
+    .refresh-btn {
+      float: right;
+      margin-top: -2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .last-updated {
+      color: #666;
+      font-size: 0.9rem;
+      text-align: right;
+      margin-top: 1rem;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .spinner-border {
+      width: 3rem;
+      height: 3rem;
+      color: var(--coffee-dark);
+    }
+
+    .alert-connection {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .full-text {
+      max-width: 300px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .full-text:hover {
+      max-width: none;
+      white-space: normal;
+      background: #f8f9fa;
+      padding: 0.5rem;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Connection Alert -->
+<div class="alert alert-danger alert-connection" id="connectionAlert">
+  ⚠️ Unable to connect to backend server! Please ensure Flask is running.
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+  <div class="container-fluid">
+    <span class="navbar-brand">👨‍💼 Admin Dashboard - WE FOR YOU</span>
+    <div>
+      <a href="/" class="btn btn-light btn-sm">🏠 Go to Frontend</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <button class="btn-back" onclick="window.location.href='/'">⬅️ Back to Home</button>
+  <button class="btn btn-primary" style="float: right; margin-bottom: 2rem;" onclick="loadData()">🔄 Refresh Data</button>
+  <div style="clear: both;"></div>
+
+  <!-- Statistics Section -->
+  <div class="stats-row">
+    <div class="stats-card">
+      <div class="icon">👨‍🎓</div>
+      <p>Total Students</p>
+      <h3 id="totalStudents">-</h3>
+    </div>
+    <div class="stats-card">
+      <div class="icon">❓</div>
+      <p>Total Queries</p>
+      <h3 id="totalQueries">-</h3>
+    </div>
+    <div class="stats-card">
+      <div class="icon">💬</div>
+      <p>Total Feedback</p>
+      <h3 id="totalFeedback">-</h3>
+    </div>
+  </div>
+
+  <!-- Students Section -->
+  <div class="table-container">
+    <h3>📚 Enrolled Students</h3>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Enrolled At</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="studentsBody">
+          <tr>
+            <td colspan="4" class="loading-spinner">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="last-updated">Last updated: <span id="queriesUpdated">-</span></div>
+  </div>
+
+  <!-- Feedback Section -->
+  <div class="table-container">
+    <h3>💬 Student Feedback</h3>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th style="width: 5%;">ID</th>
+            <th style="width: 25%;">Email</th>
+            <th style="width: 50%;">Feedback</th>
+            <th style="width: 20%;">Submitted At</th>
+          </tr>
+        </thead>
+        <tbody id="feedbackBody">
+          <tr>
+            <td colspan="4" class="loading-spinner">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="last-updated">Last updated: <span id="feedbackUpdated">-</span></div>
+  </div>
+</div>
+
+<script>
+const API_BASE_URL = 'http://127.0.0.1:5000';
+let autoRefreshInterval;
+
+// Format date to readable format
+function formatDate(isoString) {
+  const date = new Date(isoString);
+  const options = { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: true
+  };
+  return date.toLocaleString('en-US', options);
+}
+
+// Get current time
+function getCurrentTime() {
+  return new Date().toLocaleString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  });
+}
+
+// Show connection error
+function showConnectionError() {
+  const alert = document.getElementById('connectionAlert');
+  alert.style.display = 'block';
+  setTimeout(() => {
+    alert.style.display = 'none';
+  }, 5000);
+}
+
+// Load statistics
+async function loadStats() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/admin/stats`);
+    if (!response.ok) throw new Error('Failed to fetch stats');
+    
+    const stats = await response.json();
+    
+    document.getElementById('totalStudents').textContent = stats.total_students;
+    document.getElementById('totalQueries').textContent = stats.total_queries;
+    document.getElementById('totalFeedback').textContent = stats.total_feedback;
+    
+    console.log('✅ Stats loaded:', stats);
+  } catch (error) {
+    console.error('❌ Error loading stats:', error);
+    document.getElementById('totalStudents').textContent = '?';
+    document.getElementById('totalQueries').textContent = '?';
+    document.getElementById('totalFeedback').textContent = '?';
+    showConnectionError();
+  }
+}
+
+// Load students
+async function loadStudents() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/admin/students`);
+    if (!response.ok) throw new Error('Failed to fetch students');
+    
+    const students = await response.json();
+    
+    const tbody = document.getElementById('studentsBody');
+    if (students.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="no-data">No students enrolled yet</td></tr>';
+    } else {
+      tbody.innerHTML = students.map(s => `
+        <tr>
+          <td><strong>#${s.id}</strong></td>
+          <td>${s.email}</td>
+          <td>${formatDate(s.enrolled_at)}</td>
+          <td><span class="badge-status badge-active">${s.status}</span></td>
+        </tr>
+      `).join('');
+    }
+    
+    document.getElementById('studentsUpdated').textContent = getCurrentTime();
+    console.log('✅ Students loaded:', students.length);
+  } catch (error) {
+    console.error('❌ Error loading students:', error);
+    document.getElementById('studentsBody').innerHTML = 
+      '<tr><td colspan="4" class="no-data">⚠️ Error loading data. Check if backend is running.</td></tr>';
+    showConnectionError();
+  }
+}
+
+// Load queries
+async function loadQueries() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/admin/queries`);
+    if (!response.ok) throw new Error('Failed to fetch queries');
+    
+    const queriesList = await response.json();
+    
+    const tbody = document.getElementById('queriesBody');
+    if (queriesList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="no-data">No queries submitted yet</td></tr>';
+    } else {
+      tbody.innerHTML = queriesList.map(q => `
+        <tr>
+          <td><strong>#${q.id}</strong></td>
+          <td>${q.email}</td>
+          <td>
+            <div class="full-text" title="${q.question}">
+              ${q.question}
+            </div>
+          </td>
+          <td>${formatDate(q.submitted_at)}</td>
+          <td><span class="badge-status badge-pending">${q.status}</span></td>
+        </tr>
+      `).join('');
+    }
+    
+    document.getElementById('queriesUpdated').textContent = getCurrentTime();
+    console.log('✅ Queries loaded:', queriesList.length);
+  } catch (error) {
+    console.error('❌ Error loading queries:', error);
+    document.getElementById('queriesBody').innerHTML = 
+      '<tr><td colspan="5" class="no-data">⚠️ Error loading data. Check if backend is running.</td></tr>';
+    showConnectionError();
+  }
+}
+
+// Load feedback
+async function loadFeedback() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/admin/feedback`);
+    if (!response.ok) throw new Error('Failed to fetch feedback');
+    
+    const feedbackList = await response.json();
+    
+    const tbody = document.getElementById('feedbackBody');
+    if (feedbackList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="no-data">No feedback submitted yet</td></tr>';
+    } else {
+      tbody.innerHTML = feedbackList.map(f => `
+        <tr>
+          <td><strong>#${f.id}</strong></td>
+          <td>${f.email}</td>
+          <td>
+            <div class="full-text" title="${f.feedback}">
+              ${f.feedback}
+            </div>
+          </td>
+          <td>${formatDate(f.submitted_at)}</td>
+        </tr>
+      `).join('');
+    }
+    
+    document.getElementById('feedbackUpdated').textContent = getCurrentTime();
+    console.log('✅ Feedback loaded:', feedbackList.length);
+  } catch (error) {
+    console.error('❌ Error loading feedback:', error);
+    document.getElementById('feedbackBody').innerHTML = 
+      '<tr><td colspan="4" class="no-data">⚠️ Error loading data. Check if backend is running.</td></tr>';
+    showConnectionError();
+  }
+}
+
+// Load all data
+async function loadData() {
+  console.log('🔄 Loading all data...');
+  await Promise.all([
+    loadStats(),
+    loadStudents(),
+    loadQueries(),
+    loadFeedback()
+  ]);
+  console.log('✅ All data loaded successfully!');
+}
+
+// Initialize page
+async function init() {
+  console.log('🚀 Admin Dashboard initialized');
+  console.log('🔗 API Base URL:', API_BASE_URL);
+  
+  // Load data immediately
+  await loadData();
+  
+  // Auto-refresh every 30 seconds
+  autoRefreshInterval = setInterval(loadData, 30000);
+  console.log('⏰ Auto-refresh enabled (every 30 seconds)');
+}
+
+// Stop auto-refresh on page unload
+window.addEventListener('beforeunload', () => {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    console.log('⏹️ Auto-refresh stopped');
+  }
+});
+
+// Start the dashboard
+init();
+</script>
+
+</body>
+</html>
+    </div>
+    <div class="last-updated">Last updated: <span id="studentsUpdated">-</span></div>
+  </div>
+
+  <!-- Queries Section -->
+  <div class="table-container">
+    <h3>❓ Student Queries</h3>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th style="width: 5%;">ID</th>
+            <th style="width: 20%;">Email</th>
+            <th style="width: 45%;">Question</th>
+            <th style="width: 20%;">Submitted At</th>
+            <th style="width: 10%;">Status</th>
+          </tr>
+        </thead>
+        <tbody id="queriesBody">
+          <tr>
+            <td colspan="5" class="loading-spinner">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
